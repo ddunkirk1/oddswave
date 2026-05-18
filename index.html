@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OddsPulse — Live Sports Betting Odds</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f9fa;color:#1a1a1a;min-height:100vh;}
+.topbar{background:#fff;border-bottom:1px solid #e5e7eb;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
+.logo{font-size:20px;font-weight:600;color:#1a1a1a;}
+.logo span{color:#16a34a;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#16a34a;display:inline-block;margin-right:6px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.nav{display:flex;gap:4px;}
+.nav button{padding:6px 14px;border-radius:8px;border:1px solid #e5e7eb;font-size:13px;cursor:pointer;background:transparent;color:#6b7280;transition:all .15s;}
+.nav button.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a;}
+.container{max-width:1100px;margin:0 auto;padding:1.5rem;}
+.sport-tabs{display:flex;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap;}
+.stab{padding:7px 18px;border-radius:20px;border:1px solid #e5e7eb;font-size:13px;cursor:pointer;background:#fff;color:#6b7280;font-weight:500;transition:all .15s;}
+.stab.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem;}
+.stat-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;}
+.stat-card .lbl{font-size:12px;color:#6b7280;margin-bottom:4px;}
+.stat-card .val{font-size:22px;font-weight:600;color:#1a1a1a;}
+.game-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:12px;}
+.game-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.game-time{font-size:12px;color:#6b7280;}
+.game-league{font-size:11px;background:#f3f4f6;color:#6b7280;padding:2px 8px;border-radius:10px;}
+.matchup{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-bottom:14px;}
+.team-name{font-size:15px;font-weight:600;color:#1a1a1a;}
+.team-name.away{text-align:right;}
+.vs-badge{font-size:12px;color:#9ca3af;text-align:center;font-weight:500;}
+.odds-section label{font-size:11px;color:#9ca3af;font-weight:500;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px;}
+.books-header{display:grid;grid-template-columns:90px repeat(4,1fr);gap:6px;margin-bottom:4px;}
+.book-label{text-align:center;font-size:11px;color:#9ca3af;font-weight:500;}
+.odds-row{display:grid;grid-template-columns:90px repeat(4,1fr);gap:6px;margin-bottom:4px;align-items:center;}
+.team-label{font-size:12px;color:#6b7280;font-weight:500;}
+.odds-pill{text-align:center;padding:6px 4px;border-radius:8px;border:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#1a1a1a;background:#fff;cursor:pointer;transition:all .1s;}
+.odds-pill:hover{background:#f9fafb;}
+.odds-pill.best{background:#dcfce7;color:#15803d;border-color:#86efac;}
+.odds-pill.empty{color:#d1d5db;font-weight:400;font-size:11px;}
+.loading{text-align:center;padding:3rem;color:#9ca3af;font-size:15px;}
+.loading i{font-size:32px;display:block;margin-bottom:8px;}
+.error-box{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px;font-size:14px;color:#dc2626;margin-bottom:1rem;}
+.page{display:none;}
+.page.active{display:block;}
+.bet-form{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:1.5rem;}
+.bet-form h3{font-size:15px;font-weight:600;margin-bottom:14px;color:#1a1a1a;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.form-group label{font-size:12px;color:#6b7280;display:block;margin-bottom:4px;}
+.form-group input,.form-group select{width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#1a1a1a;background:#fff;}
+.btn-add{width:100%;padding:10px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;margin-top:6px;}
+.btn-add:hover{background:#333;}
+.tracker-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem;}
+.bet-list-item{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;}
+.bet-pick{font-size:14px;font-weight:500;color:#1a1a1a;}
+.bet-meta{font-size:12px;color:#9ca3af;margin-top:2px;}
+.badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:500;cursor:pointer;}
+.badge.win{background:#dcfce7;color:#15803d;}
+.badge.loss{background:#fee2e2;color:#dc2626;}
+.badge.pending{background:#f3f4f6;color:#6b7280;}
+.btn-delete{background:none;border:none;cursor:pointer;color:#d1d5db;font-size:18px;padding:4px;}
+.btn-delete:hover{color:#9ca3af;}
+.profit.pos{color:#15803d;font-weight:600;font-size:13px;}
+.profit.neg{color:#dc2626;font-weight:600;font-size:13px;}
+.profit.neutral{color:#9ca3af;font-size:13px;}
+.refresh-btn{font-size:13px;padding:6px 14px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;color:#6b7280;cursor:pointer;display:flex;align-items:center;gap:6px;}
+.refresh-btn:hover{background:#f9fafb;}
+.empty-state{text-align:center;padding:3rem;color:#9ca3af;}
+.empty-state i{font-size:40px;display:block;margin-bottom:10px;}
+@media(max-width:600px){
+  .form-grid{grid-template-columns:1fr;}
+  .tracker-stats{grid-template-columns:repeat(2,1fr);}
+  .books-header,.odds-row{grid-template-columns:70px repeat(4,1fr);}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo"><span class="live-dot"></span>odds<span>pulse</span></div>
+  <div class="nav">
+    <button class="active" onclick="showPage('odds',this)">Live odds</button>
+    <button onclick="showPage('tracker',this)">Bet tracker</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div id="page-odds" class="page active">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px;">
+      <div class="sport-tabs" id="sportTabs">
+        <button class="stab active" onclick="setSport('baseball_mlb',this)">MLB</button>
+        <button class="stab" onclick="setSport('basketball_nba',this)">NBA</button>
+        <button class="stab" onclick="setSport('icehockey_nhl',this)">NHL</button>
+      </div>
+      <button class="refresh-btn" onclick="loadOdds()"><i class="ti ti-refresh"></i> Refresh</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="lbl">Games today</div><div class="val" id="statGames">—</div></div>
+      <div class="stat-card"><div class="lbl">Books compared</div><div class="val">4</div></div>
+      <div class="stat-card"><div class="lbl">Last updated</div><div class="val" id="statTime">—</div></div>
+      <div class="stat-card"><div class="lbl">API credits left</div><div class="val" id="statCredits">—</div></div>
+    </div>
+    <div id="oddsContent"><div class="loading"><i class="ti ti-loader"></i>Fetching live odds...</div></div>
+  </div>
+
+  <div id="page-tracker" class="page">
+    <div class="bet-form">
+      <h3>Add a bet</h3>
+      <div class="form-grid">
+        <div class="form-group"><label>Pick</label><input type="text" id="betPick" placeholder="e.g. Yankees ML"></div>
+        <div class="form-group"><label>Sport</label><select id="betSport"><option>MLB</option><option>NBA</option><option>NHL</option></select></div>
+        <div class="form-group"><label>Bet type</label><select id="betType"><option>Moneyline</option><option>Spread</option><option>Total (over)</option><option>Total (under)</option><option>Player prop</option></select></div>
+        <div class="form-group"><label>Odds (American)</label><input type="number" id="betOdds" placeholder="-110"></div>
+        <div class="form-group"><label>Wager ($)</label><input type="number" id="betAmount" placeholder="50"></div>
+        <div class="form-group"><label>Result</label><select id="betResult"><option value="pending">Pending</option><option value="win">Win</option><option value="loss">Loss</option></select></div>
+      </div>
+      <button class="btn-add" onclick="addBet()">+ Add bet</button>
+    </div>
+    <div class="tracker-stats" id="trackerStats"></div>
+    <div id="betList"></div>
+  </div>
+
+</div>
+
+<script>
+const API_KEY = 'f14ef222c42119210b856d555b39093d';
+const BOOKS = ['fanduel','draftkings','betmgm','bovada'];
+const BOOK_NAMES = {fanduel:'FanDuel',draftkings:'DraftKings',betmgm:'BetMGM',bovada:'Bovada'};
+let currentSport = 'baseball_mlb';
+let bets = JSON.parse(localStorage.getItem('oddspulse_bets')||'[]');
+
+function showPage(page, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  if(page==='tracker') renderBets();
+}
+
+function setSport(sport, el) {
+  currentSport = sport;
+  document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  loadOdds();
+}
+
+function fmtOdds(o) {
+  if(o===null||o===undefined) return '—';
+  return o>0?'+'+o:''+o;
+}
+
+function getOdds(game, bookId, market, teamName) {
+  const bk = game.bookmakers.find(b=>b.key===bookId);
+  if(!bk) return null;
+  const mkt = bk.markets.find(m=>m.key===market);
+  if(!mkt) return null;
+  const out = mkt.outcomes.find(o=>o.name===teamName);
+  return out ? out.price : null;
+}
+
+async function loadOdds() {
+  document.getElementById('oddsContent').innerHTML = '<div class="loading"><i class="ti ti-loader"></i>Fetching live odds...</div>';
+  try {
+    const url = `https://api.the-odds-api.com/v4/sports/${currentSport}/odds/?apiKey=${API_KEY}&regions=us&markets=h2h,spreads,totals&bookmakers=${BOOKS.join(',')}`;
+    const res = await fetch(url);
+    const remaining = res.headers.get('x-requests-remaining');
+    if(remaining) document.getElementById('statCredits').textContent = remaining;
+    if(!res.ok) throw new Error('API returned '+res.status);
+    const data = await res.json();
+    document.getElementById('statGames').textContent = data.length;
+    document.getElementById('statTime').textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    if(!data.length) {
+      document.getElementById('oddsContent').innerHTML = '<div class="loading"><i class="ti ti-calendar-off"></i>No games right now. Check back closer to game time.</div>';
+      return;
+    }
+    let html = '';
+    data.slice(0,12).forEach(game => {
+      const away = game.away_team;
+      const home = game.home_team;
+      const gameTime = new Date(game.commence_time).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      const awayOdds = BOOKS.map(b=>getOdds(game,b,'h2h',away));
+      const homeOdds = BOOKS.map(b=>getOdds(game,b,'h2h',home));
+      const awayBest = Math.max(...awayOdds.filter(o=>o!==null));
+      const homeBest = Math.max(...homeOdds.filter(o=>o!==null));
+      html += `<div class="game-card">
+        <div class="game-meta">
+          <span class="game-time"><i class="ti ti-clock" style="font-size:12px;"></i> ${gameTime}</span>
+          <span class="game-league">${game.sport_title||''}</span>
+        </div>
+        <div class="matchup">
+          <div class="team-name away">${away}</div>
+          <div class="vs-badge">vs</div>
+          <div class="team-name">${home}</div>
+        </div>
+        <div class="odds-section">
+          <label>Moneyline — best odds highlighted</label>
+          <div class="books-header">
+            <div></div>
+            ${BOOKS.map(b=>`<div class="book-label">${BOOK_NAMES[b]}</div>`).join('')}
+          </div>
+          <div class="odds-row">
+            <span class="team-label">${away.split(' ').pop()}</span>
+            ${awayOdds.map(o=>`<div class="odds-pill${o===awayBest&&o!==null?' best':''} ${o===null?'empty':''}">${fmtOdds(o)}</div>`).join('')}
+          </div>
+          <div class="odds-row">
+            <span class="team-label">${home.split(' ').pop()}</span>
+            ${homeOdds.map(o=>`<div class="odds-pill${o===homeBest&&o!==null?' best':''} ${o===null?'empty':''}">${fmtOdds(o)}</div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+    });
+    document.getElementById('oddsContent').innerHTML = html;
+  } catch(e) {
+    document.getElementById('oddsContent').innerHTML = `<div class="error-box"><i class="ti ti-alert-circle"></i> ${e.message}</div>`;
+  }
+}
+
+function calcProfit(bet) {
+  if(bet.result==='pending') return null;
+  if(bet.result==='loss') return -bet.amount;
+  const o = parseInt(bet.odds);
+  return o>0?(o/100)*bet.amount:(100/Math.abs(o))*bet.amount;
+}
+
+function addBet() {
+  const pick = document.getElementById('betPick').value.trim();
+  const odds = document.getElementById('betOdds').value;
+  const amount = document.getElementById('betAmount').value;
+  if(!pick||!odds||!amount){alert('Please fill in all fields');return;}
+  bets.unshift({id:Date.now(),pick,sport:document.getElementById('betSport').value,type:document.getElementById('betType').value,odds:parseInt(odds),amount:parseFloat(amount),result:document.getElementById('betResult').value,date:new Date().toLocaleDateString()});
+  localStorage.setItem('oddspulse_bets',JSON.stringify(bets));
+  document.getElementById('betPick').value='';
+  document.getElementById('betOdds').value='';
+  document.getElementById('betAmount').value='';
+  renderBets();
+}
+
+function toggleResult(id) {
+  const b = bets.find(b=>b.id===id);
+  if(!b) return;
+  b.result={pending:'win',win:'loss',loss:'pending'}[b.result];
+  localStorage.setItem('oddspulse_bets',JSON.stringify(bets));
+  renderBets();
+}
+
+function deleteBet(id) {
+  bets=bets.filter(b=>b.id!==id);
+  localStorage.setItem('oddspulse_bets',JSON.stringify(bets));
+  renderBets();
+}
+
+function renderBets() {
+  const total = bets.reduce((s,b)=>s+b.amount,0);
+  const wins = bets.filter(b=>b.result==='win').length;
+  const losses = bets.filter(b=>b.result==='loss').length;
+  const profit = bets.reduce((s,b)=>{const p=calcProfit(b);return s+(p||0);},0);
+  const roi = total>0?((profit/total)*100):0;
+  document.getElementById('trackerStats').innerHTML = `
+    <div class="stat-card"><div class="lbl">Total bets</div><div class="val">${bets.length}</div></div>
+    <div class="stat-card"><div class="lbl">Record</div><div class="val" style="color:#15803d">${wins}W-${losses}L</div></div>
+    <div class="stat-card"><div class="lbl">Profit/loss</div><div class="val" style="color:${profit>=0?'#15803d':'#dc2626'}">${profit>=0?'+':''}$${Math.abs(profit).toFixed(0)}</div></div>
+    <div class="stat-card"><div class="lbl">ROI</div><div class="val" style="color:${roi>=0?'#15803d':'#dc2626'}">${roi.toFixed(1)}%</div></div>
+  `;
+  if(!bets.length){document.getElementById('betList').innerHTML='<div class="empty-state"><i class="ti ti-ticket"></i>No bets yet. Add your first one above.</div>';return;}
+  document.getElementById('betList').innerHTML = bets.map(b=>{
+    const p=calcProfit(b);
+    const pStr=p===null?'Pending':p>=0?`+$${p.toFixed(2)}`:`-$${Math.abs(p).toFixed(2)}`;
+    const pClass=p===null?'neutral':p>=0?'pos':'neg';
+    return `<div class="bet-list-item">
+      <div>
+        <div class="bet-pick">${b.pick}</div>
+        <div class="bet-meta">${b.sport} · ${b.type} · ${b.odds>0?'+':''}${b.odds} · $${b.amount} · ${b.date}</div>
+      </div>
+      <div style="text-align:right;">
+        <span class="badge ${b.result}" onclick="toggleResult(${b.id})">${b.result.charAt(0).toUpperCase()+b.result.slice(1)}</span>
+        <div class="profit ${pClass}" style="margin-top:4px;">${pStr}</div>
+      </div>
+      <button class="btn-delete" onclick="deleteBet(${b.id})" aria-label="Delete"><i class="ti ti-trash"></i></button>
+    </div>`;
+  }).join('');
+}
+
+loadOdds();
+</script>
+</body>
+</html>
