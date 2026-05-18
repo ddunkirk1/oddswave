@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OddsPulse — Live Sports Betting Odds</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2316a34a'/><text y='.9em' font-size='80' x='10'>📊</text></svg>">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#f8f9fa;--surface:#fff;--border:#e5e7eb;--text:#1a1a1a;--muted:#6b7280;--faint:#9ca3af;--accent:#16a34a;--sidebar-bg:#fff;--hover:#f3f4f6;}
+.dark{--bg:#0f1117;--surface:#1a1d24;--border:#2a2d35;--text:#f1f3f5;--muted:#9ca3af;--faint:#6b7280;--accent:#22c55e;--sidebar-bg:#13161e;--hover:#22262f;}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;transition:background .2s,color .2s;}
+.layout{display:grid;grid-template-columns:72px 1fr;min-height:100vh;}
+.sidebar{background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:2px;position:sticky;top:0;height:100vh;}
+.sport-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 6px;border-radius:10px;cursor:pointer;border:none;background:transparent;color:var(--muted);width:64px;font-size:10px;font-weight:500;transition:all .15s;}
+.sport-btn:hover{background:var(--hover);color:var(--text);}
+.sport-btn.active{background:var(--hover);color:var(--accent);}
+.sport-btn i{font-size:22px;}
+.main{display:flex;flex-direction:column;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:10;}
+.logo{font-size:17px;font-weight:700;color:var(--text);}
+.logo span{color:var(--accent);}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:5px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.nav-btn{padding:5px 12px;border-radius:8px;border:1px solid var(--border);font-size:12px;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s;}
+.nav-btn.active{background:var(--text);color:var(--bg);}
+.toggle-btn{padding:5px 10px;border-radius:8px;border:1px solid var(--border);font-size:13px;cursor:pointer;background:transparent;color:var(--muted);}
+.content{padding:1rem 1.25rem;flex:1;}
+.page{display:none;}
+.page.active{display:block;}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px;}
+.page-title{font-size:16px;font-weight:600;color:var(--text);}
+.sub-tabs{display:flex;gap:6px;}
+.sub-tab{padding:5px 14px;border-radius:20px;border:1px solid var(--border);font-size:12px;cursor:pointer;background:transparent;color:var(--muted);font-weight:500;transition:all .15s;}
+.sub-tab.active{background:var(--text);color:var(--bg);}
+.refresh-btn{font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:1rem;}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
+.sc .lbl{font-size:11px;color:var(--muted);margin-bottom:3px;}
+.sc .val{font-size:18px;font-weight:600;color:var(--text);}
+.game-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:12px;}
+.game-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.game-time{font-size:11px;color:var(--muted);}
+.game-badge{font-size:10px;background:var(--hover);color:var(--muted);padding:2px 8px;border-radius:8px;}
+.matchup{display:grid;grid-template-columns:1fr 50px 1fr;align-items:center;gap:12px;margin-bottom:14px;text-align:center;}
+.team-info{display:flex;flex-direction:column;gap:2px;}
+.team-info.away{align-items:flex-end;}
+.team-name{font-size:15px;font-weight:700;color:var(--text);}
+.pub-pct{font-size:11px;font-weight:600;}
+.pub-pct.high{color:var(--accent);}
+.pub-pct.low{color:#ef4444;}
+.vs-col{text-align:center;}
+.vs{font-size:11px;color:var(--faint);display:block;}
+.books-grid{overflow-x:auto;}
+.books-header{display:grid;grid-template-columns:80px repeat(7,1fr);gap:6px;margin-bottom:6px;min-width:540px;}
+.book-label{text-align:center;font-size:10px;color:var(--faint);font-weight:500;}
+.odds-row{display:grid;grid-template-columns:80px repeat(7,1fr);gap:6px;margin-bottom:6px;align-items:center;min-width:540px;}
+.team-lbl{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.opener-cell{text-align:center;font-size:11px;color:var(--faint);}
+.odds-pill{text-align:center;padding:5px 2px;border-radius:7px;border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text);cursor:pointer;transition:all .1s;}
+.odds-pill:hover{background:var(--hover);}
+.odds-pill.best{background:#dcfce7;color:#15803d;border-color:#86efac;}
+.dark .odds-pill.best{background:#14532d;color:#4ade80;border-color:#16a34a;}
+.odds-pill.empty{color:var(--faint);font-size:10px;font-weight:400;}
+.loading{text-align:center;padding:2.5rem;color:var(--muted);font-size:13px;}
+.error-box{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px;font-size:13px;color:#dc2626;margin-bottom:1rem;}
+.bet-form{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:1rem;}
+.bet-form h3{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.form-group label{font-size:11px;color:var(--muted);display:block;margin-bottom:3px;}
+.form-group input,.form-group select{width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:7px;font-size:12px;color:var(--text);background:var(--bg);}
+.btn-add{width:100%;padding:9px;background:var(--text);color:var(--bg);border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;margin-top:4px;}
+.tracker-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;}
+.bet-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:7px;display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;}
+.bet-pick{font-size:13px;font-weight:500;color:var(--text);}
+.bet-meta{font-size:11px;color:var(--faint);margin-top:2px;}
+.badge{display:inline-block;padding:2px 9px;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;}
+.badge.win{background:#dcfce7;color:#15803d;}
+.badge.loss{background:#fee2e2;color:#dc2626;}
+.badge.pending{background:var(--hover);color:var(--muted);}
+.del-btn{background:none;border:none;cursor:pointer;color:var(--faint);font-size:15px;padding:3px;}
+.profit.pos{color:#15803d;font-weight:600;font-size:12px;}
+.profit.neg{color:#dc2626;font-weight:600;font-size:12px;}
+.profit.neutral{color:var(--faint);font-size:12px;}
+.empty-state{text-align:center;padding:2.5rem;color:var(--muted);}
+.book-badge{display:inline-block;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;color:#fff;white-space:nowrap;letter-spacing:.01em;width:100%;text-align:center;box-sizing:border-box;}
+.game-card{box-shadow:none;}
+.matchup{padding:8px 0 4px;}
+.odds-row{margin-bottom:6px;}
+.odds-pill{min-height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:13px;}
+.books-header{margin-bottom:6px;}
+.book-label{display:flex;justify-content:center;align-items:center;padding:2px 4px;}
+.section-lbl{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;font-weight:500;}
+@media(max-width:600px){.layout{grid-template-columns:1fr;}.sidebar{flex-direction:row;height:auto;overflow-x:auto;}.form-grid{grid-template-columns:1fr;}.tracker-stats{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+<div id="root">
+<div class="layout">
+  <div class="sidebar">
+    <button class="sport-btn active" onclick="setSport('baseball_mlb','MLB',this)"><i class="ti ti-ball-baseball"></i>MLB</button>
+    <button class="sport-btn" onclick="setSport('basketball_nba','NBA',this)"><i class="ti ti-ball-basketball"></i>NBA</button>
+    <button class="sport-btn" onclick="setSport('icehockey_nhl','NHL',this)"><i class="ti ti-snowflake"></i>NHL</button>
+    <button class="sport-btn" onclick="setSport('americanfootball_nfl','NFL',this)"><i class="ti ti-ball-american-football"></i>NFL</button>
+    <button class="sport-btn" onclick="setSport('basketball_ncaab','NCAAB',this)"><i class="ti ti-school"></i>NCAAB</button>
+    
+    <button class="sport-btn" onclick="setSport('soccer_epl','Soccer',this)"><i class="ti ti-ball-football"></i>Soccer</button>
+    
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <div class="logo"><span class="live-dot"></span>odds<span>pulse</span></div>
+      <div class="topbar-right">
+        <button class="nav-btn active" onclick="showPage('odds',this)">Live odds</button>
+        <button class="nav-btn" onclick="showPage('tracker',this)">Bet tracker</button>
+        <button class="toggle-btn" onclick="toggleDark()" id="themeBtn">🌙</button>
+      </div>
+    </div>
+    <div class="content">
+      <div id="page-odds" class="page active">
+        <div class="page-header">
+          <div>
+            <div class="page-title" id="sportTitle">MLB — Live odds</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Best odds highlighted in green · 5 books compared</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <div class="sub-tabs">
+              <button class="sub-tab active" onclick="setMarket('h2h',this)">Moneyline</button>
+              <button class="sub-tab" onclick="setMarket('spreads',this)">Spread</button>
+              <button class="sub-tab" onclick="setMarket('totals',this)">Totals</button>
+            </div>
+            <button class="refresh-btn" onclick="loadOdds()">↻ Refresh</button>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="sc"><div class="lbl">Games</div><div class="val" id="statGames">—</div></div>
+          <div class="sc"><div class="lbl">Sport</div><div class="val" id="statSport">MLB</div></div>
+          <div class="sc"><div class="lbl">Books</div><div class="val" id="statBooks">—</div></div>
+          
+          
+        </div>
+        <div id="oddsContent"><div class="loading">Fetching live odds...</div></div>
+      </div>
+      <div id="page-tracker" class="page">
+        <div class="bet-form">
+          <h3>Add a bet</h3>
+          <div class="form-grid">
+            <div class="form-group"><label>Pick</label><input type="text" id="betPick" placeholder="e.g. Yankees ML"></div>
+            <div class="form-group"><label>Sport</label><select id="betSport"><option>MLB</option><option>NBA</option><option>NHL</option><option>NFL</option><option>NCAAB</option><option>NCAAF</option><option>Soccer</option><option>Tennis</option></select></div>
+            <div class="form-group"><label>Bet type</label><select id="betType"><option>Moneyline</option><option>Spread</option><option>Total over</option><option>Total under</option><option>Player prop</option><option>Futures</option></select></div>
+            <div class="form-group"><label>Odds</label><input type="number" id="betOdds" placeholder="-110"></div>
+            <div class="form-group"><label>Wager ($)</label><input type="number" id="betAmount" placeholder="50"></div>
+            <div class="form-group"><label>Result</label><select id="betResult"><option value="pending">Pending</option><option value="win">Win</option><option value="loss">Loss</option></select></div>
+          </div>
+          <button class="btn-add" onclick="addBet()">+ Add bet</button>
+        </div>
+        <div class="tracker-stats" id="trackerStats">
+          <div class="sc"><div class="lbl">Total bets</div><div class="val">0</div></div>
+          <div class="sc"><div class="lbl">Record</div><div class="val">0W-0L</div></div>
+          <div class="sc"><div class="lbl">Profit</div><div class="val">$0</div></div>
+          <div class="sc"><div class="lbl">ROI</div><div class="val">0%</div></div>
+        </div>
+        <div id="betList"><div class="empty-state">No bets yet. Add your first one above.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+const API_KEY='f14ef222c42119210b856d555b39093d';
+const BOOKS=['fanduel','draftkings','betmgm','williamhill_us','betonline_ag','mybookieag','bovada'];
+const BOOK_NAMES={fanduel:'FanDuel',draftkings:'DraftKings',betmgm:'BetMGM',williamhill_us:'Caesars',betonline_ag:'BetOnline',mybookieag:'MyBookie',bovada:'Bovada'};
+const BOOK_COLORS={fanduel:'#0078ff',draftkings:'#53d337',betmgm:'#c8a84b',williamhill_us:'#003f2d',betonline_ag:'#d0021b',mybookieag:'#7c3aed',bovada:'#1e40af'};
+let currentSport='baseball_mlb',currentSportName='MLB',currentMarket='h2h',isDark=false;
+let bets=JSON.parse(localStorage.getItem('oddspulse_bets')||'[]');
+function toggleDark(){isDark=!isDark;document.getElementById('root').className=isDark?'dark':'';document.getElementById('themeBtn').textContent=isDark?'☀️':'🌙';}
+function showPage(page,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+page).classList.add('active');document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');if(page==='tracker')renderBets();}
+function setSport(sport,name,el){currentSport=sport;currentSportName=name;document.querySelectorAll('.sport-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');document.getElementById('sportTitle').textContent=name+' — Live odds';document.getElementById('statSport').textContent=name;loadOdds();}
+function setMarket(market,el){currentMarket=market;document.querySelectorAll('.sub-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');loadOdds();}
+function fmt(o){if(o===null||o===undefined)return'—';return o>0?'+'+o:''+o;}
+
+
+async function loadOdds(){
+  document.getElementById('oddsContent').innerHTML='<div class="loading">Fetching live odds...</div>';
+  try{
+    const url=`https://api.the-odds-api.com/v4/sports/${currentSport}/odds/?apiKey=${API_KEY}&regions=us,us2&markets=${currentMarket}&oddsFormat=american&bookmakers=${BOOKS.join(',')}`;
+    const res=await fetch(url);
+    if(!res.ok)throw new Error('API error '+res.status);
+    const data=await res.json();
+    document.getElementById('statGames').textContent=data.length||0;
+    document.getElementById('statBooks').textContent=BOOKS.length;
+    if(!data.length){document.getElementById('oddsContent').innerHTML='<div class="loading">No games available right now for this sport. It may be out of season or between events — try MLB, NBA or NHL.</div>';return;}
+    let html='';
+    data.slice(0,12).forEach(game=>{
+      const away=game.away_team,home=game.home_team;
+      const gt=new Date(game.commence_time).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      function getVal(bookId,team){
+        const bk=game.bookmakers.find(b=>b.key===bookId);
+        if(!bk)return null;
+        const mkt=bk.markets.find(m=>m.key===currentMarket);
+        if(!mkt)return null;
+        if(currentMarket==='totals'){
+          const side=mkt.outcomes.find(o=>o.name===(team==='over'?'Over':'Under'));
+          return side?{price:side.price,point:side.point}:null;
+        }
+        const out=mkt.outcomes.find(o=>o.name===team);
+        if(!out)return null;
+        if(currentMarket==='spreads')return{price:out.price,point:out.point};
+        return out.price;
+      }
+      const awayKey=currentMarket==='totals'?'over':away;
+      const homeKey=currentMarket==='totals'?'under':home;
+      const awayVals=BOOKS.map(b=>getVal(b,awayKey));
+      const homeVals=BOOKS.map(b=>getVal(b,homeKey));
+      const awayPrices=awayVals.map(v=>v===null?null:(typeof v==='object'?v.price:v)).filter(v=>v!==null);
+      const homePrices=homeVals.map(v=>v===null?null:(typeof v==='object'?v.price:v)).filter(v=>v!==null);
+      const awayBest=awayPrices.length?Math.max(...awayPrices):null;
+      const homeBest=homePrices.length?Math.max(...homePrices):null;
+      const awayLbl=currentMarket==='totals'?'Over':away.split(' ').pop();
+      const homeLbl=currentMarket==='totals'?'Under':home.split(' ').pop();
+      function cell(val,best,isOver){
+        if(val===null)return'<div class="odds-pill empty">—</div>';
+        if(typeof val==='object'&&val.point!==undefined){
+          const isBest=val.price===best;
+          if(currentMarket==='totals'){
+            const prefix=isOver?'O':'U';
+            return`<div class="odds-pill${isBest?' best':''}">${prefix} ${val.point}<br><span style="font-size:10px;font-weight:400;">${fmt(val.price)}</span></div>`;
+          }
+          return`<div class="odds-pill${isBest?' best':''}">${val.point>0?'+':''}${val.point}<br><span style="font-size:10px;font-weight:400;">${fmt(val.price)}</span></div>`;
+        }
+        const isBest=val===best;
+        return`<div class="odds-pill${isBest?' best':''}">${fmt(val)}</div>`;
+      }
+      html+=`<div class="game-card">
+        <div class="game-meta"><span class="game-time">🕐 ${gt}</span><span class="game-badge">${game.sport_title||currentSportName}</span></div>
+        <div class="matchup">
+          <div class="team-info away"><span class="team-name">${away}</span></div>
+          <div class="vs-col"><span class="vs">vs</span></div>
+          <div class="team-info"><span class="team-name">${home}</span></div>
+        </div>
+        <div class="books-grid">
+          <div class="section-lbl">${currentMarket==='h2h'?'Moneyline':currentMarket==='spreads'?'Spread':'Totals'} — green = best odds</div>
+          <div class="books-header"><div></div>${BOOKS.map(b=>`<div class="book-label"><span class="book-badge" style="background:${BOOK_COLORS[b]}">${BOOK_NAMES[b]}</span></div>`).join('')}</div>
+          <div class="odds-row"><span class="team-lbl">${awayLbl}</span>${awayVals.map(v=>cell(v,awayBest,true)).join('')}</div>
+          <div class="odds-row"><span class="team-lbl">${homeLbl}</span>${homeVals.map(v=>cell(v,homeBest,false)).join('')}</div>
+        </div>
+      </div>`;
+    });
+    document.getElementById('oddsContent').innerHTML=html;
+  }catch(e){document.getElementById('oddsContent').innerHTML=`<div class="error-box">⚠️ ${e.message}${e.message.includes('404')||e.message.includes('422')?' — this sport may be out of season or between tournaments. Try another sport.':''}</div>`;}
+}
+
+function calcProfit(b){if(b.result==='pending')return null;if(b.result==='loss')return -b.amount;const o=parseInt(b.odds);return o>0?(o/100)*b.amount:(100/Math.abs(o))*b.amount;}
+function addBet(){const pick=document.getElementById('betPick').value.trim();const odds=document.getElementById('betOdds').value;const amount=document.getElementById('betAmount').value;if(!pick||!odds||!amount){alert('Fill in all fields');return;}bets.unshift({id:Date.now(),pick,sport:document.getElementById('betSport').value,type:document.getElementById('betType').value,odds:parseInt(odds),amount:parseFloat(amount),result:document.getElementById('betResult').value,date:new Date().toLocaleDateString()});localStorage.setItem('oddspulse_bets',JSON.stringify(bets));document.getElementById('betPick').value='';document.getElementById('betOdds').value='';document.getElementById('betAmount').value='';renderBets();}
+function toggleResult(id){const b=bets.find(b=>b.id===id);if(!b)return;b.result={pending:'win',win:'loss',loss:'pending'}[b.result];localStorage.setItem('oddspulse_bets',JSON.stringify(bets));renderBets();}
+function deleteBet(id){bets=bets.filter(b=>b.id!==id);localStorage.setItem('oddspulse_bets',JSON.stringify(bets));renderBets();}
+function renderBets(){const total=bets.reduce((s,b)=>s+b.amount,0);const wins=bets.filter(b=>b.result==='win').length;const losses=bets.filter(b=>b.result==='loss').length;const profit=bets.reduce((s,b)=>{const p=calcProfit(b);return s+(p||0);},0);const roi=total>0?((profit/total)*100):0;document.getElementById('trackerStats').innerHTML=`<div class="sc"><div class="lbl">Total bets</div><div class="val">${bets.length}</div></div><div class="sc"><div class="lbl">Record</div><div class="val" style="color:#15803d">${wins}W-${losses}L</div></div><div class="sc"><div class="lbl">Profit</div><div class="val" style="color:${profit>=0?'#15803d':'#dc2626'}">${profit>=0?'+':''}$${Math.abs(profit).toFixed(0)}</div></div><div class="sc"><div class="lbl">ROI</div><div class="val" style="color:${roi>=0?'#15803d':'#dc2626'}">${roi.toFixed(1)}%</div></div>`;if(!bets.length){document.getElementById('betList').innerHTML='<div class="empty-state">No bets yet. Add your first one above.</div>';return;}document.getElementById('betList').innerHTML=bets.map(b=>{const p=calcProfit(b);const pStr=p===null?'Pending':p>=0?`+$${p.toFixed(2)}`:`-$${Math.abs(p).toFixed(2)}`;const pClass=p===null?'neutral':p>=0?'pos':'neg';return`<div class="bet-item"><div><div class="bet-pick">${b.pick}</div><div class="bet-meta">${b.sport} · ${b.type} · ${b.odds>0?'+':''}${b.odds} · $${b.amount} · ${b.date}</div></div><div style="text-align:right;"><span class="badge ${b.result}" onclick="toggleResult(${b.id})">${b.result.charAt(0).toUpperCase()+b.result.slice(1)}</span><div class="profit ${pClass}" style="margin-top:3px;">${pStr}</div></div><button class="del-btn" onclick="deleteBet(${b.id})">🗑</button></div>`;}).join('');}
+loadOdds();
+</script>
+</body>
+</html>
